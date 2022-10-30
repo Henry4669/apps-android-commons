@@ -8,10 +8,12 @@ import static fr.free.nrw.commons.utils.MapUtils.ZOOM_LEVEL;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.LocationManager;
@@ -32,6 +34,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatTextView;
+import androidx.preference.PreferenceManager;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -82,6 +85,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import java.util.List;
+import java.util.Locale;
 import javax.inject.Inject;
 import javax.inject.Named;
 import timber.log.Timber;
@@ -171,6 +175,8 @@ public class ExploreMapFragment extends CommonsDaggerSupportFragment
         super.onViewCreated(view, savedInstanceState);
         mapView.onStart();
         setSearchThisAreaButtonVisibility(false);
+        capitaliseSearchThisAreaButtonText(R.string.search_this_area);
+
         tvAttribution.setText(Html.fromHtml(getString(R.string.map_attribution)));
         initNetworkBroadCastReceiver();
 
@@ -803,5 +809,22 @@ public class ExploreMapFragment extends CommonsDaggerSupportFragment
                 }
             }
         };
+    }
+
+    /**
+     * Capitalises the text used by "Search this area" button.
+     * @param stringResource - Text for button.
+     */
+    private void capitaliseSearchThisAreaButtonText(final int stringResource){
+        final SharedPreferences preferences =
+            getContext().getSharedPreferences("Settings",
+            Activity.MODE_PRIVATE);
+        final String language = preferences.getString("language", "");
+        final Locale locale = new Locale(language);
+        final String searchAreaText = getResources().getString(stringResource);
+        final String setSearchAreaText =
+            searchAreaText.substring(0,1).toUpperCase(locale)
+            + searchAreaText.substring(1).toLowerCase(locale);
+        searchThisAreaButton.setText(setSearchAreaText);
     }
 }
